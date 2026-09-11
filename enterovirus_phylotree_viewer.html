@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Enterovirus contig maximum-likelihood phylogeny</title>
+  <script src="https://d3js.org/d3.v6.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.13.6/underscore-min.js"></script>
+  <script>window.__underscore_for_phylotree = window._;</script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
+  <script>window._$1 = window._; window._ = window.__underscore_for_phylotree;</script>
+  <script src="https://cdn.jsdelivr.net/npm/phylotree@1.2.3/dist/phylotree.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #1f2933;
+      background: #f7f9fb;
+    }
+    header {
+      padding: 18px 24px 12px;
+      border-bottom: 1px solid #d7dde5;
+      background: #ffffff;
+    }
+    h1 {
+      margin: 0 0 6px;
+      font-size: 20px;
+      font-weight: 650;
+    }
+    .meta {
+      color: #5f6c7b;
+      font-size: 13px;
+    }
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      padding: 12px 24px;
+      border-bottom: 1px solid #d7dde5;
+      background: #eef3f7;
+    }
+    button, input {
+      font: inherit;
+      font-size: 13px;
+      border: 1px solid #b7c1cc;
+      border-radius: 4px;
+      background: #ffffff;
+      color: #1f2933;
+      padding: 6px 9px;
+    }
+    button { cursor: pointer; }
+    button:hover { background: #f4f7fa; }
+    input { min-width: 280px; }
+    #status {
+      margin-left: auto;
+      color: #52606d;
+      font-size: 13px;
+    }
+    #tree-container {
+      height: calc(100vh - 126px);
+      min-height: 640px;
+      overflow: auto;
+      background: #ffffff;
+    }
+    .error {
+      margin: 20px 24px;
+      padding: 12px 14px;
+      border: 1px solid #f0b8b8;
+      border-radius: 4px;
+      background: #fff4f4;
+      color: #8a1f1f;
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      white-space: pre-wrap;
+    }
+    .fallback-tree {
+      display: block;
+      max-width: none;
+      width: 1200px;
+      margin: 16px 24px;
+      border: 1px solid #d7dde5;
+      background: #ffffff;
+    }
+    path.branch,
+    path.branch-selected,
+    path.branch-tagged,
+    path.branch-tracer,
+    .tree-selection-brush .extent {
+      fill: none !important;
+      stroke: #596a7a;
+      stroke-width: 1.1px;
+    }
+    path.branch-tracer {
+      stroke: #ccd4dc;
+      stroke-dasharray: 2 3;
+      stroke-width: 0.8px;
+    }
+    path.clade {
+      fill: rgba(47, 111, 135, 0.12);
+      stroke: #2f6f87;
+      stroke-width: 1px;
+    }
+    .node circle { fill: #ffffff; stroke: #2f6f87; stroke-width: 1.2px; }
+    .node text { font-size: 10px; fill: #1f2933; }
+    .highlighted-tip text { fill: #b42318 !important; font-weight: 700; }
+    .highlighted-tip circle { fill: #ffd1cc !important; stroke: #b42318 !important; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Enterovirus contig maximum-likelihood phylogeny</h1>
+    <div class="meta">Rendered with phylotree.js from <code>enterovirus_len900_dedup.treefile</code>. Zoom and pan are enabled; use browser search or the tip filter below for labels.</div>
+  </header>
+  <div class="toolbar">
+    <button id="rectangular">Rectangular</button>
+    <button id="radial">Radial</button>
+    <button id="fit-width">Fit Width</button>
+    <input id="tip-filter" type="search" placeholder="Highlight tip labels containing..." aria-label="Highlight tip labels">
+    <span id="status"></span>
+  </div>
+  <div id="tree-container"></div>
+  <script>
+    const newick = "(Enterovirus_alphacoxsackie-PRJEB102331_ERR15877869_cov65.00_109_3341:0.0000021164,((((((((Enterovirus_alphacoxsackie-PRJEB102331_ERR15824585_cov11.00_070_1802:0.0000027336,Enterovirus_alphacoxsackie-PRJEB102331_ERR15994653_cov5.00_026_1015:0.0374093035)100:0.1630045383,(Enterovirus_alphacoxsackie-PRJEB102331_ERR15827517_cov8.00_066_1416:0.0000023893,((Enterovirus_alphacoxsackie-PRJEB102331_ERR15879342_cov35.00_012_2328:0.0000021190,Enterovirus_alphacoxsackie-PRJEB102331_ERR15880380_cov28.00_051_1313:0.1907789774)100:0.0621185211,(Enterovirus_alphacoxsackie-PRJEB102331_ERR15880399_cov11.00_085_2470:0.0323690894,Enterovirus_alphacoxsackie-PRJEB102331_ERR15994271_cov9.00_019_1957:0.0304702308)100:0.0606336923)100:0.1303225301)98:0.0967425099)85:0.0550554217,(Enterovirus_alphacoxsackie-PRJEB102331_ERR15827504_cov32.00_078_1062:0.0628960494,Enterovirus_alphacoxsackie-PRJEB102331_ERR15827545_cov8.00_027_1472:0.0000020068)100:0.2664497559)98:0.2834227799,(Enterovirus_alphacoxsackie-PRJEB102331_ERR15880375_cov9.00_060_2006:0.3243009690,Enterovirus_alphacoxsackie-PRJEB102331_ERR15877869_cov7.00_051_1461:0.2820395805)100:0.4624602848)62:0.1351691648,Enterovirus_alphacoxsackie-PRJEB102331_ERR15879087_cov7.00_055_1146:0.7631938487)100:0.3173872561,(((Enterovirus_alphacoxsackie-PRJEB102331_ERR15827504_cov10.00_059_1465:0.8545807179,((Enterovirus_alphacoxsackie-PRJEB102331_ERR15879087_cov6.00_043_1184:0.8523193261,((((((((Enterovirus_alphacoxsackie-PRJEB102331_ERR15880375_cov8.00_053_4051:0.0000020090,((((((((Enterovirus_alphacoxsackie-PRJEB102331_ERR15827504_cov13.00_025_1452:0.0760693848,Enterovirus_alphacoxsackie-PRJEB102331_ERR15879481_cov21.00_003_1276:0.0000026076)43:0.0044239627,Enterovirus_alphacoxsackie-PRJEB102331_ERR15827504_cov40.00_055_1024:0.0018038491)53:0.0344420770,(((((((((((((Enterovirus_alphacoxsackie-PRJEB102331_ERR15827504_cov35.00_021_1350:0.0030180646,Enterovirus_alphacoxsackie-PRJEB102331_ERR15879481_cov19.86_047_2628:0.0051907697)82:0.0010148616,(((Enterovirus_alphacoxsackie-PRJEB102331_ERR15879376_cov10.00_015_1443:0.0082904156,(Enterovirus_alphacoxsackie-PRJEB102331_ERR15880155_cov9.00_013_1571:0.0012433592,(Enterovirus_alphacoxsackie-PRJEB102331_ERR15934391_cov6.00_033_1231:0.0141478428,Enterovirus_alphacoxsackie-PRJEB102331_ERR15934512_cov7.00_060_1821:0.0036272382)65:0.0008221135)87:0.0026880468)64:0.0022942934,(Enterovirus_alphacoxsackie-PRJEB102331_ERR15934459_cov7.00_010_1005:0.0053864422,Enterovirus_alphacoxsackie-PRJEB102331_ERR15934478_cov6.00_003_1562:0.0131829912)89:0.0028469620)49:0.0013087083,Enterovirus_alphacoxsackie-PRJEB102331_ERR15934462_cov13.00_083_1093:0.0092152885)51:0.0016457507)54:0.0019717421,(Enterovirus_alphacoxsackie-PRJEB102331_ERR15827513_cov6.00_011_1086:0.0065147229,((Enterovirus_alphacoxsackie-PRJEB102331_ERR15835030_cov12.00_072_1603:0.0115719570,Enterovirus_alphacoxsackie-PRJEB102331_ERR15841174_cov18.00_065_2043:0.0083885978)44:0.0000026982,Enterovirus_alphacoxsackie-PRJEB102331_ERR15877819_cov4.00_077_1221:0.0049635267)46:0.0015696379)12:0.0000029258)11:0.0000020717,Enterovirus_alphacoxsackie-PRJEB102331_ERR15827517_cov8.00_049_1127:0.0071407954)54:0.0044608910,Enterovirus_alphacoxsackie-PRJEB102331_ERR15880056_cov16.00_089_2751:0.0178675257)39:0.0007346783,Enterovirus_alphacoxsackie-PRJEB102331_ERR15879277_cov24.00_107_1984:0.0115192006)94:0.0028803936,Enterovirus_alphacoxsackie-PRJEB102331_ERR15879230_cov8.00_117_1381:0.0541122001)80:0.0030017876,Enterovirus_alphacoxsackie-PRJEB102331_ERR15880135_cov10.00_031_1068:0.0018933785)99:0.0117022522,Enterovirus_alphacoxsackie-PRJEB102331_ERR15934462_cov16.00_012_1544:0.0075431604)100:0.0475849130,Enterovirus_alphacoxsackie-PRJEB102331_ERR15877874_cov46.95_016_1012:0.0607409047)97:0.0402582771,((Enterovirus_alphacoxsackie-PRJEB102331_ERR15877874_cov19.00_064_1331:0.0232830245,(Enterovirus_alphacoxsackie-PRJEB102331_ERR15879304_cov9.00_151_1387:0.0030273738,Enterovirus_alphacoxsackie-PRJEB102331_ERR15934361_cov5.00_085_1181:0.0000023233)95:0.0201480192)79:0.0390997476,Enterovirus_alphacoxsackie-PRJEB102331_ERR15881129_cov5.00_044_1016:0.1930294526)79:0.0776738029)71:0.0331125791,(Enterovirus_betacoxsackie-PRJEB102331_ERR15879342_cov5.00_054_1048:0.1204401694,Enterovirus_betacoxsackie-PRJEB102331_ERR15880375_cov9.00_110_1094:0.0930331856)100:0.2616254625)87:0.1245187156,(Enterovirus_betacoxsackie-PRJEB102331_ERR15934482_cov18.00_028_2270:0.3362642523,(Enterovirus_coxsackiepol-PRJEB102331_ERR15841179_cov9.00_027_1741:0.2954877695,Enterovirus_coxsackiepol-PRJEB102331_ERR15879896_cov6.00_094_1149:0.2522108094)100:0.1604608626)100:0.2478195850)22:0.0073114053)91:0.0280196005,Enterovirus_alphacoxsackie-PRJEB102331_ERR15934482_cov8.00_020_1011:0.0013216854)100:0.1407287521,((Enterovirus_alphacoxsackie-PRJEB102331_ERR15877874_cov6.00_088_1011:0.7772203699,Enterovirus_alphacoxsackie-PRJEB102331_ERR15879237_cov9.00_007_1710:0.8764584753)93:0.2014354634,Enterovirus_alphacoxsackie-PRJEB102331_ERR15880369_cov12.00_075_1176:1.0178366847)38:0.0614467222)37:0.0110393037,(Enterovirus_alphacoxsackie-PRJEB102331_ERR15934482_cov7.00_079_2416:0.0000026385,(Enterovirus_alphacoxsackie-PRJEB102331_ERR15841174_cov14.00_002_1275:1.0779875065,Enterovirus_betacoxsackie-PRJEB102331_ERR15880382_cov8.00_032_1622:1.0854290963)55:0.0883871610)27:0.0021550081)54:0.0071901516,(((Enterovirus_alphacoxsackie-PRJEB102331_ERR15880382_cov5.00_001_1036:0.0010816785,Enterovirus_betacoxsackie-PRJEB102331_ERR15879896_cov4.00_087_1099:1.0476172943)52:0.0014300681,(Enterovirus_alphacoxsackie-PRJEB102331_ERR15877839_cov14.00_049_2431:0.1054549476,Enterovirus_alphacoxsackie-PRJEB102331_ERR15880502_cov6.00_092_1226:0.0741602054)100:1.2440654200)57:0.0063301615,Enterovirus_coxsackiepol-PRJEB102331_ERR15841174_cov12.00_099_1238:1.1387947384)37:0.0012712467)14:0.0007234488,Enterovirus_betacoxsackie-PRJEB102331_ERR15880375_cov16.00_008_1720:1.3073680127)23:0.0000022731)82:0.0693359603,(((Enterovirus_alphacoxsackie-PRJEB102331_ERR15877869_cov12.00_091_1847:0.4875960917,(Enterovirus_alphacoxsackie-PRJEB102331_ERR15880369_cov11.00_041_1568:0.0550835772,(Enterovirus_alphacoxsackie-PRJEB102331_ERR15934357_cov8.00_068_1190:0.0386526564,Enterovirus_alphacoxsackie-PRJEB102331_ERR15934388_cov6.00_078_1485:0.0007026990)86:0.0202366979)100:0.4692608716)100:0.2339971027,Enterovirus_alphacoxsackie-PRJEB102331_ERR15877874_cov14.00_103_1103:0.6999591634)100:0.3685274743,(Enterovirus_betacoxsackie-PRJEB102331_ERR15880375_cov14.00_083_1210:0.0557010698,Enterovirus_betacoxsackie-PRJEB102331_ERR15880382_cov8.00_036_1139:0.0375360011)100:0.9993080109)71:0.0715689505)46:0.0310284788,Enterovirus_betacoxsackie-PRJEB102331_ERR15880419_cov6.00_047_1754:1.0702282214)69:0.0951886392,(((Enterovirus_alphacoxsackie-PRJEB102331_ERR15880382_cov6.00_074_1188:0.8781851579,((Enterovirus_alphacoxsackie-PRJEB102331_ERR15877869_cov35.00_028_1155:0.0000029060,(Enterovirus_alphacoxsackie-PRJEB102331_ERR15880480_cov8.32_030_1291:0.1044950928,(Enterovirus_alphacoxsackie-PRJEB102331_ERR15994270_cov16.00_011_1140:0.0019815583,Enterovirus_alphacoxsackie-PRJEB102331_ERR15994271_cov18.00_060_1127:0.0000011572)44:0.0000029321)60:0.0009231946)97:0.1000608492,(Enterovirus_alphacoxsackie-PRJEB102331_ERR15879342_cov10.94_096_1282:0.0000025022,Enterovirus_alphacoxsackie-PRJEB102331_ERR15880380_cov9.00_021_1295:0.1327606334)96:0.1109177070)95:0.7804517174)47:0.0427831599,(Enterovirus_alphacoxsackie-PRJEB102331_ERR15879297_cov5.00_032_1138:0.9219295757,Enterovirus_alphacoxsackie-PRJEB102331_ERR15934354_cov6.00_010_1015:0.8456590033)31:0.0456254587)23:0.0243297140,((Enterovirus_alphacoxsackie-PRJEB102331_ERR15827545_cov8.00_015_1076:0.0029455891,Enterovirus_alphacoxsackie-PRJEB102331_ERR15880419_cov15.00_086_1010:0.0151351975)99:0.0453763424,Enterovirus_alphacoxsackie-PRJEB102331_ERR15934319_cov12.00_024_1192:0.0464699546)88:0.6913543394)50:0.0363399309)64:0.1016660235,Enterovirus_betacoxsackie-PRJEB102331_ERR15934482_cov13.00_032_1540:0.9716039829)92:0.1539409970,Enterovirus_alphacoxsackie-PRJEB102331_ERR15879087_cov12.00_030_1332:0.8828769028)69:0.0499758389,Enterovirus_betacoxsackie-PRJEB102331_ERR15879304_cov6.00_064_1027:0.8095254670)93:0.0984289252,((((((Enterovirus_coxsackiepol-PRJEB102331_ERR15827517_cov17.00_014_4462:0.0000024082,((Enterovirus_coxsackiepol-PRJEB102331_ERR15827513_cov13.00_043_1470:0.0058257991,Enterovirus_coxsackiepol-PRJEB102331_ERR15827545_cov7.00_078_1302:0.0024416155)27:0.0000012106,Enterovirus_coxsackiepol-PRJEB102331_ERR15835032_cov10.00_043_1120:0.0009079250)41:0.0009687141)66:0.0020084620,Enterovirus_coxsackiepol-PRJEB102331_ERR15827545_cov9.00_021_1333:0.0001592425)49:0.0009874020,Enterovirus_coxsackiepol-PRJEB102331_ERR15824585_cov23.00_013_2456:0.0000029475)84:0.0490277180,((Enterovirus_coxsackiepol-PRJEB102331_ERR15934258_cov9.00_095_1506:0.0014307141,Enterovirus_coxsackiepol-PRJEB102331_ERR15994653_cov16.00_073_1527:0.0007048852)100:0.0451556681,Enterovirus_coxsackiepol-PRJEB102331_ERR15934390_cov18.00_050_1500:0.0572217756)100:0.3178517243)100:0.3300199888,Enterovirus_betacoxsackie-PRJEB102331_ERR15880375_cov9.00_026_1575:0.0313640346)100:0.3141054974,((((Enterovirus_coxsackiepol-PRJEB102331_ERR15841174_cov21.00_038_3163:0.0000024085,(Enterovirus_coxsackiepol-PRJEB102331_ERR15824585_cov36.00_027_2495:0.0012114445,Enterovirus_coxsackiepol-PRJEB102331_ERR15841179_cov16.00_020_3101:0.0008169590)97:0.0023995253)96:0.1190802922,Enterovirus_coxsackiepol-PRJEB102331_ERR15877874_cov5.00_035_1454:0.3127952419)38:0.0000022325,Enterovirus_coxsackiepol-PRJEB102331_ERR15824585_cov50.00_053_1088:0.9723726257)95:0.1755846134,Enterovirus_coxsackiepol-PRJEB102331_ERR15934372_cov13.00_020_1130:0.9510758899)97:0.2509234152)100:0.3162953864)100:0.3097727966)59:0.0678590489,(Enterovirus_betacoxsackie-PRJEB102331_ERR15877874_cov7.00_065_1014:0.3424241430,Enterovirus_betacoxsackie-PRJEB102331_ERR15880375_cov15.00_062_1473:0.2360886117)100:0.4831870330)60:0.1234830659)47:0.0158588883,Enterovirus_betacoxsackie-PRJEB102331_ERR15878765_cov6.00_068_1050:1.0387959850)78:0.0862279631,Enterovirus_alphacoxsackie-PRJEB102331_ERR15881561_cov47.00_041_1057:1.0478989257)64:0.0821132523)69:0.0572464672,Enterovirus_alphacoxsackie-PRJEB102331_ERR15879087_cov7.00_068_1460:1.0213034233)55:0.0097851102,Enterovirus_betacoxsackie-PRJEB102331_ERR15877869_cov13.00_099_1439:1.1835825846)77:0.0403201610,(((((((((((((Enterovirus_alphacoxsackie-PRJEB102331_ERR15841174_cov16.00_026_1772:0.0040534916,Enterovirus_alphacoxsackie-PRJEB102331_ERR15934365_cov6.00_046_1133:1.1306135839)65:0.0075427833,(Enterovirus_alphacoxsackie-PRJEB102331_ERR15880382_cov9.00_070_1295:0.0144696497,Enterovirus_alphacoxsackie-PRJEB102331_ERR15880406_cov4.00_004_1271:0.0051277858)70:0.0027529883)13:0.0000022594,Enterovirus_alphacoxsackie-PRJEB102331_ERR15877819_cov5.00_041_1791:0.0067768138)45:0.0026694504,Enterovirus_alphacoxsackie-PRJEB102331_ERR15994653_cov4.00_014_1268:0.0127024540)89:0.0137448023,Enterovirus_alphacoxsackie-PRJEB102331_ERR15880533_cov8.00_031_1003:0.0231679078)59:0.0012426823,Enterovirus_alphacoxsackie-PRJEB102331_ERR15994270_cov8.00_059_1642:0.0337360455)68:0.0051245021,Enterovirus_alphacoxsackie-PRJEB102331_ERR15881391_cov19.00_001_1005:0.0125974266)83:0.0079903499,Enterovirus_alphacoxsackie-PRJEB102331_ERR15879800_cov5.00_015_1237:0.0049403789)80:0.0058019525,Enterovirus_alphacoxsackie-PRJEB102331_ERR15880516_cov8.00_019_1076:0.0575312614)42:0.0009995089,Enterovirus_alphacoxsackie-PRJEB102331_ERR15880380_cov22.00_050_1109:0.0000026448)39:0.0018411115,Enterovirus_alphacoxsackie-PRJEB102331_ERR15877874_cov81.00_051_2862:0.0000027416)36:0.0012758369,Enterovirus_alphacoxsackie-PRJEB102331_ERR15878573_cov13.00_091_2270:0.0049210074)46:0.0024939757,(((((Enterovirus_alphacoxsackie-PRJEB102331_ERR15879478_cov4.00_012_1167:0.0722603349,((Enterovirus_alphacoxsackie-PRJEB102331_ERR15827504_cov11.00_070_1220:0.0085890857,Enterovirus_alphacoxsackie-PRJEB102331_ERR15880369_cov7.00_033_1179:0.0072551155)98:0.0585752006,(Enterovirus_alphacoxsackie-PRJEB102331_ERR15827513_cov25.00_070_2481:0.0884681415,Enterovirus_alphacoxsackie-PRJEB102331_ERR15934297_cov5.00_038_1072:0.1000192876)58:0.0242298176)92:0.0456056234)46:0.0003638214,Enterovirus_alphacoxsackie-PRJEB102331_ERR15880382_cov3.00_073_1094:0.1087296294)100:0.0855200294,Enterovirus_alphacoxsackie-PRJEB102331_ERR15880135_cov7.00_034_1268:0.0000022601)100:0.0415948547,Enterovirus_betacoxsackie-PRJEB102331_ERR15880382_cov10.00_045_1002:0.5507846285)100:0.0563855701,Enterovirus_alphacoxsackie-PRJEB102331_ERR15880419_cov30.00_033_1152:0.0242361056)100:0.0675481590)86:0.0062479482);";
+    const fallbackMarkup = "<img class=\"fallback-tree\" src=\"enterovirus_ml_tree.png\" alt=\"Static phylogeny fallback\">";
+    let tree = null;
+    let currentLayout = "rectangular";
+
+    function containerSize() {
+      const container = document.getElementById("tree-container");
+      return {
+        width: Math.max(container.clientWidth - 20, 1200),
+        height: Math.max(container.clientHeight - 20, 1600)
+      };
+    }
+
+    function showFallback(message, error) {
+      const details = error && error.stack ? error.stack : (error || "");
+      document.getElementById("status").textContent = message;
+      document.getElementById("tree-container").innerHTML = `<div class="error">${message}${details ? "\n" + details : ""}</div>${fallbackMarkup}`;
+    }
+
+    function renderTree(layout = currentLayout) {
+      try {
+        currentLayout = layout;
+        const container = document.getElementById("tree-container");
+        d3.select(container).selectAll("*").remove();
+        tree = new phylotree.phylotree(newick, { bootstrap_values: true, type: "nwk" });
+        if (!tree.nodes || !tree.nodes.descendants || !tree.nodes.descendants().length) {
+          throw new Error("phylotree.js could not parse the Newick tree");
+        }
+        const size = containerSize();
+        const display = tree.render({
+          container: "#tree-container",
+          width: layout === "radial" ? Math.max(size.width, size.height) : size.width,
+          height: size.height,
+          zoom: true,
+          selectable: true,
+          collapsible: true,
+          "align-tips": layout !== "radial",
+          "show-scale": true,
+          "draw-size-bubbles": false,
+          "left-right-spacing": "fit-to-size",
+          "top-bottom-spacing": "fixed-step",
+          "is-radial": layout === "radial",
+          layout: "left-to-right"
+        });
+        const svg = display && display.show ? display.show() : null;
+        if (svg && !container.contains(svg)) {
+          container.appendChild(svg);
+        }
+        const tips = tree.getTips ? tree.getTips().length : tree.nodes.leaves().length;
+        document.getElementById("status").textContent = `${tips} tips`;
+        highlightTips(document.getElementById("tip-filter").value);
+      } catch (error) {
+        console.error(error);
+        showFallback("Render error", error);
+      }
+    }
+
+    function highlightTips(query) {
+      const q = (query || "").toLowerCase();
+      d3.selectAll("g.node").classed("highlighted-tip", false);
+      if (!q) return;
+      d3.selectAll("g.node").filter(function() {
+        return (d3.select(this).text() || "").toLowerCase().includes(q);
+      }).classed("highlighted-tip", true);
+    }
+
+    document.getElementById("rectangular").addEventListener("click", () => renderTree("rectangular"));
+    document.getElementById("radial").addEventListener("click", () => renderTree("radial"));
+    document.getElementById("fit-width").addEventListener("click", () => {
+      const svg = document.querySelector("#tree-container svg");
+      if (svg) svg.scrollIntoView({ block: "start", inline: "start" });
+    });
+    document.getElementById("tip-filter").addEventListener("input", event => highlightTips(event.target.value));
+    window.addEventListener("resize", () => renderTree(currentLayout));
+
+    if (!window.phylotree || !window.d3 || !window._ || !window._$1) {
+      showFallback("Unable to load phylotree.js dependencies from CDN. Showing static fallback if provided.");
+    } else {
+      renderTree("rectangular");
+    }
+  </script>
+</body>
+</html>

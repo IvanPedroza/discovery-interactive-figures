@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="data:,">
+  <title>Interactive chart embed test</title>
+  <meta name="description" content="A standalone interactive chart with fictional data for testing blog embeds.">
+  <link rel="stylesheet" href="./style.css">
+  <script defer src="./plotly.min.js"></script>
+  <script defer src="./chart.js"></script>
+</head>
+<body>
+  <main>
+    <header>
+      <p class="eyebrow">INTERACTIVE EMBED TEST</p>
+      <h1>Comparing design iterations</h1>
+      <p class="note">Fictional sample data. Not Microsoft Discovery research results.</p>
+    </header>
+    <div class="controls">
+      <label for="metric">Measure <select id="metric"><option value="performance">Performance score</option><option value="energy">Energy per run</option></select></label>
+      <button type="button" id="reset">Reset chart</button>
+    </div>
+    <div id="chart" aria-label="Interactive line chart. Exact values are available in the data table below."></div>
+    <p class="help">Hover or tap a point for its value. Select a series name to hide or show it.</p>
+    <details>
+      <summary>View the sample data</summary>
+      <div class="table-wrap"><table><caption id="table-caption">Performance score, on a 0–100 scale</caption><thead><tr><th scope="col">Iteration</th><th scope="col">Design A</th><th scope="col">Design B</th></tr></thead><tbody id="values"></tbody></table></div>
+    </details>
+    <noscript>This chart needs JavaScript. Fictional performance scores for iterations 1–7: Design A: 42, 51, 58, 66, 72, 78, 82. Design B: 40, 47, 57, 61, 65, 71, 76.</noscript>
+  </main>
+</body>
+</html>
