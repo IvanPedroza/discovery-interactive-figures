@@ -15,8 +15,8 @@
     select, button { font: inherit; font-size: 13px; padding: 6px 8px; border: 1px solid #b7c1cc; border-radius: 4px; background: #fff; }
     button { cursor: pointer; }
     main { padding: 18px 24px 30px; display: grid; gap: 18px; }
-    .panel { background: #fff; border: 1px solid #d7dde5; border-radius: 6px; padding: 12px; }
-    .chart { width: 100%; height: 520px; }
+    .panel { background: #fff; border: 1px solid #d7dde5; border-radius: 6px; padding: 12px; min-width: 0; }
+    .chart { width: 100%; max-width: 1000px; height: 520px; margin-inline: auto; }
     #composition-chart { height: 420px; }
   </style>
 </head>
@@ -144,6 +144,7 @@
         groups.forEach((city, index) => traces.push(makeTrace(rows.filter(row => row.geographic_location_city === city), city, metric, index)));
       }
       Plotly.react("trend-chart", traces, {
+        autosize: true,
         title: { text: `${genus === "__all__" ? "Top ten genera" : genus} over time`, x: 0 },
         xaxis: { title: "Collection week" },
         yaxis: { title: metricLabel(metric), type: scaleSelect.value },
@@ -152,7 +153,10 @@
         legend: { orientation: "h", y: -0.22 },
         margin: { l: 70, r: 20, t: 50, b: 90 },
         hovermode: "x unified"
-      }, { responsive: true });
+      }, {
+        responsive: true,
+        toImageButtonOptions: { format: "png", filename: "wastewater-trends-1000px", width: 1000, height: 520, scale: 1 }
+      });
     }
 
     function renderComposition() {
@@ -166,10 +170,14 @@
         hovertemplate: "%{x}<br>%{y:,.2f}<extra></extra>"
       }], {
         title: { text: "Total signal across selected genera", x: 0 },
+        autosize: true,
         xaxis: { title: "Genus", tickangle: -35 },
         yaxis: { title: metricLabel(metric), type: scaleSelect.value },
         margin: { l: 70, r: 20, t: 50, b: 140 }
-      }, { responsive: true });
+      }, {
+        responsive: true,
+        toImageButtonOptions: { format: "png", filename: "wastewater-totals-1000px", width: 1000, height: 420, scale: 1 }
+      });
     }
 
     function renderAll() { renderTrend(); renderComposition(); }
