@@ -144,7 +144,7 @@
         groups.forEach((city, index) => traces.push(makeTrace(rows.filter(row => row.geographic_location_city === city), city, metric, index)));
       }
       Plotly.react("trend-chart", traces, {
-        title: { text: `${genus === "__all__" ? "Top fecal-oral genera" : genus} over time`, x: 0 },
+        title: { text: `${genus === "__all__" ? "Top ten genera" : genus} over time`, x: 0 },
         xaxis: { title: "Collection week" },
         yaxis: { title: metricLabel(metric), type: scaleSelect.value },
         shapes: monsoonShapes(),
